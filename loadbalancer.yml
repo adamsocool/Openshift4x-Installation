@@ -1,6 +1,6 @@
 ---
 - name: setup loadbalancer
-  hosts: centos
+  hosts: loadbalancer
 
   tasks:
   - name: disable firewalld
