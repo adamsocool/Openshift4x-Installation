@@ -1,0 +1,54 @@
+---
+- name: setup loadbalancer
+  hosts: centos
+
+  tasks:
+  - name: disable firewalld
+    service: 
+      name: firewalld  
+      state: stopped
+      enabled: false
+
+  - name: Ensure SELinux is set to enforcing mode
+    lineinfile:
+      path: /etc/selinux/config
+      regexp: '^SELINUX='
+      line: SELINUX=Permissive
+
+  - name: Install a list of packages 
+    yum:
+      name:
+        - vim
+        - net-tools
+        - setroubleshoot 
+        - setools
+        - haproxy
+        - httpd
+      state: present
+
+  - name: turn on haproxy_connect_any
+    shell: sealert -a /var/log/audit/audit.log 
+
+  - name: start and enable haproxy
+    service:
+      name: haproxy
+      state: started
+      enabled: true
+
+  - name: start and enable httpd
+    service:
+      name: httpd
+      state: started
+      enabled: true
+  
+  - name: bind httpd to port 8080
+    lineinfile:
+      dest: /etc/httpd/conf/httpd.conf
+      regexp: ^Listen 80
+      line: Listen 8080
+
+  - name: restart haproxy
+    service:
+      name: haproxy
+      state: restarted
+    
